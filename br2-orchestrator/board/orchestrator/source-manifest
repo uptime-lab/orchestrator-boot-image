@@ -1,12 +1,12 @@
 # Source manifest of the recovery image's GPL base: what the corpus the
 # offer names actually IS. Written by notices/source-manifest.py; never
 # edit by hand. A rebake that swaps only the agent keeps every value.
-# Measured from: the corresponding-source bundle recovery-image-source-buildroot-2026.02.3+br2-80cd6cc2+20260728.tar
+# Measured from: the Buildroot output trees and the image assembled from them
 format 2
-base_id buildroot-2026.02.3+br2-80cd6cc2+20260728
+base_id buildroot-2026.02.3+br2-1cd5ae3e+20261119
 buildroot_version 2026.02.3
-board_commit f2268fab4589f2fda66b11ac7aeba227cff9bcb5
-archive bundle recovery-image-source-buildroot-2026.02.3+br2-80cd6cc2+20260728.tar fefc5a82de1d00d255dbffe48a147fad579c159cb15ab87adf6d3d886945a80e 901672960
+board_commit 1cd5ae3e898df1e73e883cd7918c42a84b484cb4
+archive bundle recovery-image-source-buildroot-2026.02.3+br2-1cd5ae3e+20261119.tar d608d315764181e289864e0861015c4c859fbf7201e6b88cd3b69ba7bbd3c5e0 901416960
 archive toolchain arm-gnu-toolchain-src-snapshot-14.2.rel1.tar.xz e6405f20f8a817a50d92dbf7974d0ee77708dfdf9e79900a59c5d343b464ef9c 311500280
 config buildroot-cm4 3348dcdec33372bc446a7868e3e43c44607e3b664f9f2da5c0409352632201b6
 config buildroot-cm5 8e3068066de708d1b1cd92684ae4bbea585dce77c2b0f6b345bfb9a0578a2589
@@ -16,8 +16,8 @@ config linux-cm4 0800825f33f790cd1fb66e2165ed67cb7b8008fedc86ee006f786435466834f
 config linux-cm5 aeebe73925b0120c46bc6df9de4a354a06cb3166ab427a0f66818ca4b53ba240
 legal_manifest cm4 66722205ea53345b10171bac09794181fc0f89ef17c2b2a40ad64d1fcaa733f7
 legal_manifest cm5 66722205ea53345b10171bac09794181fc0f89ef17c2b2a40ad64d1fcaa733f7
-kernel bcm2711 a20b65222a6c7bfb6caf6204cae6fb88b99725dbbd038bdb586f3df4a2f80f75
-kernel bcm2712 77f0db6578dc371a6d1144a5fedc84da863372b99a642660227745f3cd3db8cb
+kernel bcm2711 f7a323015e8b252789e0760db22f3bc510e533f8f63c00b20715a94edd763075
+kernel bcm2712 aac2cc54e1d4454d253452f0ba9ebc4ed4b8885939c0f7fffdb74ea64f78218c
 source sources/busybox-1.37.0/0001-networking-libiproute-use-linux-if_packet.h-instead-.patch d4324e1972fd86e20b6b9524c8738baf51a2ad5536f95794493d21990c94cdc3
 source sources/busybox-1.37.0/0002-Makefile.flags-strip-non-l-arguments-returned-by-pkg.patch bbb362d7beefab00adfef46e7053eaf3786c476e62cd254f08af286f9cf4fe0b
 source sources/busybox-1.37.0/0003-libbb-sockaddr2str-ensure-only-printable-characters-.patch 5d063d321e86c0a40cbc9875491675becb6474123c3426a994c7afb076555f3e
@@ -57,20 +57,20 @@ rootfs_exclude etc/inittab
 rootfs_exclude etc/ssl/certs/ca-certificates.crt
 rootfs_exclude usr/bin/orchestrator-agent
 rootfs_exclude usr/bin/vcgencmd
-overlay etc/init.d/S00console - 0755 0:0 1041 0daae09282e92a6a820ac3d87302132e54c2ccbfcaa462261620aee98f42d07a
-overlay etc/init.d/S99agent - 0755 0:0 19288 c52771986481206336b91e7051c5fe9725dd88e6667e1dbe7f2a95803c4c91b5
-overlay etc/inittab - 0644 0:0 3320 cbf76c2aa529005cb444c4303c3cdc19daec8a3ee989d403579edd4ac4b71143
+overlay etc/init.d/S00console - 0755 0:0 1040 fd33e65d56c2c86d02d8ef082c06b1ed22106992f7e87f87d3ada7fff896c4a2
+overlay etc/init.d/S99agent - 0755 0:0 19014 ae4566051c82abe5aaf0c3824f7c5f262524961241b46fc8254e8b7f8a977698
+overlay etc/inittab - 0644 0:0 3125 ff3c4807dd8998a2a5c8bfcf297d4cbfa2f7255539fd458dcf91280ca1671931
 overlay etc/ssl/certs/ca-certificates.crt - 0644 0:0 182140 42abac4a108699ceed5de68ec2d45928fec88de6108370c99d80f1184f7d9e79
 overlay usr/bin/vcgencmd - 0755 0:0 67952 8fdfc77195a25c9f9a98a62f4fe638e3c241e908f4edef2ed27e4e6c6d53133c
-rootfs_stripped_sha256 797178685832050f0855c42c8f78fe2dc762218a304f9bf75e91f92298780d17
-rootfs_stripped_entries 544
+rootfs_stripped_sha256 aee5cd0f5b7ee3ec7707754e9fc166e2c9346456f8f19cad41ac1cdce3c48426
+rootfs_stripped_entries 542
 fat_exclude LICENSES/
 fat_exclude SOURCE-OFFER.txt
 fat_exclude cmdline.txt
 fat_exclude config.txt
 fat_exclude rootfs.cpio.gz
 board_file cmdline.txt ac9278ab4e2e7bb48e7b031b4729de4edfe734719389eff499372490743e815a
-board_file config.txt 4e67b5edf12417b2b7cc508e72bc194af5ed2b11a6f202226c25cbc28e60fb09
+board_file config.txt 72030c45276de916c4a11ea2422e3d57545560b27a8441d770c1a44c261a66d2
 licence Apache-2.0.txt cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30
 licence GPL-2.0.txt edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6
 licence GPL-3.0.txt 3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986
@@ -79,5 +79,5 @@ licence LICENCE.broadcom c7283ff51f863d93a275c66e3b4cb08021a5dd4d8c1e7acc47d872f
 licence NOTICE-orchestrator-agent.txt by-name
 licence THIRD-PARTY-NOTICES-orchestrator-agent.md by-name
 licence THIRD-PARTY-NOTICES.txt bce732c00555cd5753c7d7330b8dd0d96ea088bf99d70027cc98d78f35226ca9
-fat_base_sha256 3227fe6a15bd71a3db529d11e40676df98e1570a04525eebf107989f142ea6e9
+fat_base_sha256 9eb1e73e66bc2d77103c4351b26302cf89668a77ed8403f99fb6806f60d49a05
 fat_base_files 375
