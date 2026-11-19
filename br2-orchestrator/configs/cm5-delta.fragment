@@ -1,0 +1,45 @@
+# Orchestrator deltas appended to the stock raspberrypicm5io_defconfig.
+# (Stock config + these lines; later lines win.) Needs buildroot 2025.08-rc3+.
+# See README.md.
+
+# RAM bootstrap: standalone gzip'd cpio rootfs, NOT embedded in the kernel.
+BR2_TARGET_ROOTFS_CPIO=y
+BR2_TARGET_ROOTFS_CPIO_GZIP=y
+# Drop the stock 120M ext4 rootfs.
+# BR2_TARGET_ROOTFS_EXT2 is not set
+# BR2_TARGET_ROOTFS_INITRAMFS is not set
+
+BR2_ROOTFS_OVERLAY="$(BR2_EXTERNAL_ORCHESTRATOR_PATH)/board/orchestrator/rootfs-overlay"
+
+# Wired DHCP on eth0. CM5 NIC = RP1 southbridge over PCIe (Cadence macb driver);
+# requires a recent kernel (rpi-6.12.y) + the bcm2712-rpi-cm5-* DTBs.
+BR2_SYSTEM_DHCP="eth0"
+
+# Disable the stock RPi post-image script (genimage SD-card build needs ext4).
+# We assemble boot.img ourselves via board/orchestrator/assemble-boot-img.sh.
+BR2_ROOTFS_POST_IMAGE_SCRIPT=""
+
+# Full util-linux "basic set" (includes lsblk) for the agent's DetectDevices()
+# to enumerate NVMe/block devices. Auto-selects required libs.
+BR2_PACKAGE_UTIL_LINUX=y
+BR2_PACKAGE_UTIL_LINUX_BINARIES=y
+BR2_PACKAGE_UTIL_LINUX_WIPEFS=y
+
+# Tools the agent shells out to for install_os / erase_drive / partition expand.
+BR2_PACKAGE_PARTED=y
+BR2_PACKAGE_E2FSPROGS=y
+BR2_PACKAGE_E2FSPROGS_RESIZE2FS=y
+
+# Device trees for EVERY BCM2712 board this image supports.
+#
+# bcm2712d0-rpi-5-b is the D0 stepping of the Pi 5 and is a DIFFERENT file from
+# bcm2712-rpi-5-b; later Pi 5 boards are D0, and Compute Modules enumerating as
+# BCM2712D0 exist in the field. The -cm4io variants are
+# for a CM5/CM5L on a CM4IO-class carrier (e.g. Compute Blade). All of them are
+# names the firmware can auto-select, so shipping them is what makes it safe to
+# eventually drop the forced global device_tree= in config.txt.
+BR2_LINUX_KERNEL_INTREE_DTS_NAME="broadcom/bcm2712-rpi-cm5-cm5io broadcom/bcm2712-rpi-cm5l-cm5io broadcom/bcm2712-rpi-cm5-cm4io broadcom/bcm2712-rpi-cm5l-cm4io broadcom/bcm2712-rpi-5-b broadcom/bcm2712d0-rpi-5-b broadcom/bcm2712-rpi-500"
+
+# See the note in cm4-delta.fragment: the module tree is unusable here and costs
+# ~24 MB of a hard-capped image.
+BR2_ROOTFS_POST_BUILD_SCRIPT="$(BR2_EXTERNAL_ORCHESTRATOR_PATH)/board/orchestrator/post-build.sh"

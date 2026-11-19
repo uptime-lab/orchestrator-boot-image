@@ -1,0 +1,27 @@
+Uptime Orchestrator agent
+Copyright 2025-2026 Uptime Lab Inc. and the Uptime Orchestrator authors
+
+The agent binary in this image (usr/bin/orchestrator-agent inside
+rootfs.cpio.gz) is licensed under the Apache License, Version 2.0; the text is
+in LICENSES/Apache-2.0.txt beside this file.
+
+This product includes software developed by third parties. The licence and
+notice texts of every module compiled into the agent are in
+THIRD-PARTY-NOTICES-orchestrator-agent.md beside this file; the one Apache
+NOTICE among them is also reproduced here:
+
+google.golang.org/grpc (NOTICE.txt)
+
+    Copyright 2014 gRPC authors.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.

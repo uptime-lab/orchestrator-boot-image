@@ -1,0 +1,24 @@
+# Buildroot build artifacts (generated, never committed)
+output/
+dl/
+*.o
+*.log
+
+# Assembled boot image / signature and intermediate rootfs artifacts
+boot.img
+boot.sig
+*.cpio
+*.cpio.gz
+rootfs.*
+
+# The agent binary is a release artifact: scripts/fetch-agent.sh downloads a
+# signed release of the agent and places it in the rootfs overlay before the
+# build. It is not source and must not be committed here. The path is named
+# exactly, never by a pattern: notices/source-manifest.py reads this line to
+# leave the agent out of the rootfs digest.
+br2-orchestrator/board/orchestrator/rootfs-overlay/usr/bin/orchestrator-agent
+
+# The image is built, never committed: net_install/ is where a serving host
+# keeps boot.img + boot.sig, and dist/ is where make-source-bundle.sh writes.
+net_install/
+dist/

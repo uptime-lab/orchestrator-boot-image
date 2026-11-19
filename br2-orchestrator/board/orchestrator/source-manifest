@@ -1,0 +1,83 @@
+# Source manifest of the recovery image's GPL base: what the corpus the
+# offer names actually IS. Written by notices/source-manifest.py; never
+# edit by hand. A rebake that swaps only the agent keeps every value.
+# Measured from: the corresponding-source bundle recovery-image-source-buildroot-2026.02.3+br2-80cd6cc2+20260728.tar
+format 2
+base_id buildroot-2026.02.3+br2-80cd6cc2+20260728
+buildroot_version 2026.02.3
+board_commit f2268fab4589f2fda66b11ac7aeba227cff9bcb5
+archive bundle recovery-image-source-buildroot-2026.02.3+br2-80cd6cc2+20260728.tar fefc5a82de1d00d255dbffe48a147fad579c159cb15ab87adf6d3d886945a80e 901672960
+archive toolchain arm-gnu-toolchain-src-snapshot-14.2.rel1.tar.xz e6405f20f8a817a50d92dbf7974d0ee77708dfdf9e79900a59c5d343b464ef9c 311500280
+config buildroot-cm4 3348dcdec33372bc446a7868e3e43c44607e3b664f9f2da5c0409352632201b6
+config buildroot-cm5 8e3068066de708d1b1cd92684ae4bbea585dce77c2b0f6b345bfb9a0578a2589
+config busybox-cm4 8e6777e37dbe8066bd67f70b95ef6f0f321ea813f90e25ee004b98bf46759d40
+config busybox-cm5 8e6777e37dbe8066bd67f70b95ef6f0f321ea813f90e25ee004b98bf46759d40
+config linux-cm4 0800825f33f790cd1fb66e2165ed67cb7b8008fedc86ee006f786435466834fb
+config linux-cm5 aeebe73925b0120c46bc6df9de4a354a06cb3166ab427a0f66818ca4b53ba240
+legal_manifest cm4 66722205ea53345b10171bac09794181fc0f89ef17c2b2a40ad64d1fcaa733f7
+legal_manifest cm5 66722205ea53345b10171bac09794181fc0f89ef17c2b2a40ad64d1fcaa733f7
+kernel bcm2711 a20b65222a6c7bfb6caf6204cae6fb88b99725dbbd038bdb586f3df4a2f80f75
+kernel bcm2712 77f0db6578dc371a6d1144a5fedc84da863372b99a642660227745f3cd3db8cb
+source sources/busybox-1.37.0/0001-networking-libiproute-use-linux-if_packet.h-instead-.patch d4324e1972fd86e20b6b9524c8738baf51a2ad5536f95794493d21990c94cdc3
+source sources/busybox-1.37.0/0002-Makefile.flags-strip-non-l-arguments-returned-by-pkg.patch bbb362d7beefab00adfef46e7053eaf3786c476e62cd254f08af286f9cf4fe0b
+source sources/busybox-1.37.0/0003-libbb-sockaddr2str-ensure-only-printable-characters-.patch 5d063d321e86c0a40cbc9875491675becb6474123c3426a994c7afb076555f3e
+source sources/busybox-1.37.0/0004-nslookup-sanitize-all-printed-strings-with-printable.patch dc494525a7120c28dbc0afa238c6cfebfd2a5ee59bb255c481bfd675bcb2a4dd
+source sources/busybox-1.37.0/0005-seedrng-fix-getrandom-detection-for-non-glibc-libc.patch 8f6634f457ad26ab6f88dffe64c971a75f81251e1565085904f9b44bfd3fbc52
+source sources/busybox-1.37.0/0006-menuconfig-GCC-failing-saying-ncurses-is-not-found.patch a26b5b699d84d01d19a291b4dcc53c117a3326d3a58ec205caaf238d2ed217ff
+source sources/busybox-1.37.0/0007-tc-Fix-compilation-with-Linux-v6.8-rc1.patch 1e07632c8c7f76eb2d87bcd574dd0f785874c4d307ad0a22e822943c66cc6978
+source sources/busybox-1.37.0/0008-awk.c-fix-CVE-2023-42366-bug-15874.patch 3f221c1015776a8e9f18a2c6941dd6c2a54b0257f7136fd88e86543742de58fc
+source sources/busybox-1.37.0/0009-hwclock-Check-for-SYS_settimeofday-before-calling-sy.patch f50dae9976a0022de9f0122d724394561daad6266b39e27f1c3fe5eb4164b759
+source sources/busybox-1.37.0/0010-libbb-sha-add-missing-sha-NI-guard.patch 1191339ec410b0d9887cd9a8ec955aa87d5e1155a23155ce39d7b0e7fb3e09ec
+source sources/busybox-1.37.0/0011-syslogd-fix-wrong-OPT_locallog-flag-detection.patch f6644c4c40c48c43edd8650b95bb42d685aeb9d7487270226864ec93bf46bb27
+source sources/busybox-1.37.0/0012-archival-libarchive-sanitize-filenames-on-output.patch 1be6414cf4f9e890bc0a90c5d2e8bdc4b7768fd00c252f9a28e180ee87f1fed5
+source sources/busybox-1.37.0/0013-testsuite-tar-tests-fix-test-after-cve-2025-46394.patch 738615776b0dca878b170f9242bab7d07023e5cb70dfe7c19fcfed3e72dfad4b
+source sources/busybox-1.37.0/0014-wget-dont-allow-control-characters-or-spaces-in-the-URL.patch 0506f13375c2425d2ff46a453616a9cb88de1a0c6878d26cd5fdc8ae9ebea51f
+source sources/busybox-1.37.0/busybox-1.37.0.tar.bz2 3311dff32e746499f4df0d5df04d7eb396382d7e108bb9250e7b519b837043a4
+source sources/busybox-1.37.0/series 92d1635780b9cb5c62d1d2c5a4a7894dc9275812228df8e16bc835a9e324ff21
+source sources/e2fsprogs-1.47.3/0001-configure.ac-check-for-FS_IOC_READ_VERITY_METADATA-a.patch 205de2438fe9c1cafb44d6cb16187e6f8dbb75a67b1423682a5039ac4bee3496
+source sources/e2fsprogs-1.47.3/e2fsprogs-1.47.3.tar.xz 857e6ef800feaa2bb4578fbc810214be5d3c88b072ea53c5384733a965737329
+source sources/e2fsprogs-1.47.3/series f140be7123dba1219e6e344b7208dd1dadd2a9f2edb0255a49c006f86c7a9245
+source sources/kmod-33/0001-fix-O_CLOEXEC.patch 6e679b3c16d1908100adf07a4569e19fa0af5704dd5a61b6355ab92ad2f952cc
+source sources/kmod-33/kmod-33.tar.xz dc768b3155172091f56dc69430b5481f2d76ecd9ccb54ead8c2540dbcf5ea9bc
+source sources/kmod-33/series 830c15b188aa0855cbecb795408a545767fb1af8e4bc6e60c873a7b35998e673
+source sources/linux-custom/linux-21b410140c47ffab5668399f6f143c7d7b935c8b.tar.gz 7c31df8061aae748a6e72417bfe743a54198fb5bdc96e229ecc605dc621d32ef
+source sources/parted-3.6/0001-bug-74444-PATCH-parted-fix-do_version-declaration.patch ccbcb8ebb9efa7864b809677ab7b499c640e5b7ea6d57dec81a56f33b6800b8f
+source sources/parted-3.6/parted-3.6.tar.xz 3b43dbe33cca0f9a18601ebab56b7852b128ec1a3df3a9b30ccde5e73359e612
+source sources/parted-3.6/series 0557b45a8a379d4eadb3ae2a955fe32274e82360dc868839e0e556bcd467b319
+source sources/rpi-firmware-063bcab6c8a90efb0d19f69d88cbbc7ec79cab68/rpi-firmware-063bcab6c8a90efb0d19f69d88cbbc7ec79cab68.tar.gz 812cb64617d6ffbc76f9b8dce8237b31159a1216b31845faec1bb75b6b6b291f
+source sources/toolchain-external-arm-aarch64-14.2.rel1/arm-gnu-toolchain-14.2.rel1-aarch64-aarch64-none-linux-gnu.tar.xz 299c56db1644c135670afabbf801b97a42e5ef6069d73157ab869458cbda2096
+source sources/util-linux-2.41.4/0001-include-mount-api-utils.h-fix-LSMT_ROOT-definition.patch 08b842937e25d1a33974dfb47d0dbe8db37d5b6458dc012633a01e14732aa248
+source sources/util-linux-2.41.4/0002-autotools-optionally-add-libpthread-to-uuid.pc.patch b488f9b7b1d0a6fe171b04d72cb79ef8f262945925a19cad2eeee2c372882877
+source sources/util-linux-2.41.4/series 8abcc0805ffdf50b9320b56e80c1634492418a98961997ab3f24e8ac606af828
+source sources/util-linux-2.41.4/util-linux-2.41.4.tar.xz a8c213cc06048862602a42b2d299b340001f6d05c4407b549f3e03521df83688
+source sources/xz-5.8.3/xz-5.8.3.tar.bz2 33bf69c0d6c698e83a68f77e6c1f465778e418ca0b3d59860d3ab446f4ac99a6
+rootfs_exclude etc/init.d/S00console
+rootfs_exclude etc/init.d/S99agent
+rootfs_exclude etc/inittab
+rootfs_exclude etc/ssl/certs/ca-certificates.crt
+rootfs_exclude usr/bin/orchestrator-agent
+rootfs_exclude usr/bin/vcgencmd
+overlay etc/init.d/S00console - 0755 0:0 1041 0daae09282e92a6a820ac3d87302132e54c2ccbfcaa462261620aee98f42d07a
+overlay etc/init.d/S99agent - 0755 0:0 19288 c52771986481206336b91e7051c5fe9725dd88e6667e1dbe7f2a95803c4c91b5
+overlay etc/inittab - 0644 0:0 3320 cbf76c2aa529005cb444c4303c3cdc19daec8a3ee989d403579edd4ac4b71143
+overlay etc/ssl/certs/ca-certificates.crt - 0644 0:0 182140 42abac4a108699ceed5de68ec2d45928fec88de6108370c99d80f1184f7d9e79
+overlay usr/bin/vcgencmd - 0755 0:0 67952 8fdfc77195a25c9f9a98a62f4fe638e3c241e908f4edef2ed27e4e6c6d53133c
+rootfs_stripped_sha256 797178685832050f0855c42c8f78fe2dc762218a304f9bf75e91f92298780d17
+rootfs_stripped_entries 544
+fat_exclude LICENSES/
+fat_exclude SOURCE-OFFER.txt
+fat_exclude cmdline.txt
+fat_exclude config.txt
+fat_exclude rootfs.cpio.gz
+board_file cmdline.txt ac9278ab4e2e7bb48e7b031b4729de4edfe734719389eff499372490743e815a
+board_file config.txt 4e67b5edf12417b2b7cc508e72bc194af5ed2b11a6f202226c25cbc28e60fb09
+licence Apache-2.0.txt cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30
+licence GPL-2.0.txt edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6
+licence GPL-3.0.txt 3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986
+licence LGPL-2.1.txt 20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95
+licence LICENCE.broadcom c7283ff51f863d93a275c66e3b4cb08021a5dd4d8c1e7acc47d872fbe52d3d6b
+licence NOTICE-orchestrator-agent.txt by-name
+licence THIRD-PARTY-NOTICES-orchestrator-agent.md by-name
+licence THIRD-PARTY-NOTICES.txt bce732c00555cd5753c7d7330b8dd0d96ea088bf99d70027cc98d78f35226ca9
+fat_base_sha256 3227fe6a15bd71a3db529d11e40676df98e1570a04525eebf107989f142ea6e9
+fat_base_files 375

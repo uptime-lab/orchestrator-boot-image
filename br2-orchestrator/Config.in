@@ -1,0 +1,5 @@
+# Orchestrator br2-external package menu.
+# The agent is delivered via the rootfs overlay as a released binary
+# (scripts/fetch-agent.sh), so there are no custom packages yet.
+# Add `source "$BR2_EXTERNAL_ORCHESTRATOR_PATH/package/<name>/Config.in"`
+# lines here when the agent becomes a proper buildroot package.

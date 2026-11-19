@@ -1,0 +1,369 @@
+PERMISSIVE-LICENCE NOTICES OF THIS IMAGE
+========================================
+
+The BSD, MIT, ISC and 0BSD notices of the programs in this image, and of the
+prebuilt vcgencmd, as their packages ship them. The GPL, LGPL and Apache
+texts are the other files in this directory; the source archive named in
+SOURCE-OFFER.txt carries every licence file of every package.
+
+------------------------------------------------------------------------
+busybox: bzip2 decompressor (bzip2 licence)
+
+bzip2 applet in busybox is based on lightly-modified source
+of bzip2 version 1.0.4. bzip2 source is distributed
+under the following conditions (copied verbatim from LICENSE file)
+===========================================================
+
+
+This program, "bzip2", the associated library "libbzip2", and all
+documentation, are copyright (C) 1996-2006 Julian R Seward.  All
+rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. The origin of this software must not be misrepresented; you must
+   not claim that you wrote the original software.  If you use this
+   software in a product, an acknowledgment in the product
+   documentation would be appreciated but is not required.
+
+3. Altered source versions must be plainly marked as such, and must
+   not be misrepresented as being the original software.
+
+4. The name of the author may not be used to endorse or promote
+   products derived from this software without specific prior written
+   permission.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Julian Seward, Cambridge, UK.
+jseward@bzip.org
+bzip2/libbzip2 version 1.0.4 of 20 December 2006
+
+------------------------------------------------------------------------
+e2fsprogs: licensing summary
+
+This package, the EXT2 filesystem utilities, are made available under
+the GNU Public License version 2, with the exception of the lib/ext2fs
+and lib/e2p libraries, which are made available under the GNU Library
+General Public License Version 2, the lib/uuid library which is made
+available under a BSD-style license and the lib/et and lib/ss
+libraries which are made available under an MIT-style license.  Please
+see lib/uuid/COPYING for more details for the license for the files
+comprising the libuuid library, and the source file headers of the
+libet and libss libraries for more information.
+
+The most recent officially distributed version can be found at
+http://e2fsprogs.sourceforge.net.  If you need to make a distribution,
+that's the one you should use.  If there is some reason why you'd like
+a more recent version that is still in ALPHA testing (i.e., either
+using the "WIP" test distributions or one from the hg or git
+repository from the development branch, please contact me
+(tytso@mit.edu) before you ship.  The release schedules for this
+package are flexible, if you give me enough lead time.
+
+
+					Theodore Ts'o
+					23-June-2007
+
+------------------------------------------------------------------------
+e2fsprogs: libet (MIT-style)
+
+/*
+ * internal include file for com_err package
+ *
+ * Permission to use, copy, modify, and distribute this software and
+ * its documentation for any purpose is hereby granted, provided that
+ * the names of M.I.T. and the M.I.T. S.I.P.B. not be used in
+ * advertising or publicity pertaining to distribution of the software
+ * without specific, written prior permission.  M.I.T. and the
+ * M.I.T. S.I.P.B. make no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without
+ * express or implied warranty.
+ */
+
+------------------------------------------------------------------------
+e2fsprogs: libss (MIT-style)
+
+/*
+
+Copyright 1987 by the Student Information Processing Board
+	of the Massachusetts Institute of Technology
+
+Permission to use, copy, modify, and distribute this software
+and its documentation for any purpose and without fee is
+hereby granted, provided that the above copyright notice
+appear in all copies and that both that copyright notice and
+this permission notice appear in supporting documentation,
+and that the names of M.I.T. and the M.I.T. S.I.P.B. not be
+used in advertising or publicity pertaining to distribution
+of the software without specific, written prior permission.
+M.I.T. and the M.I.T. S.I.P.B. make no representations about
+the suitability of this software for any purpose.  It is
+provided "as is" without express or implied warranty.
+
+*/
+
+
+------------------------------------------------------------------------
+util-linux: licensing summary
+
+
+The project util-linux doesn't use the same license for all of the code.
+There is code under:
+
+   * GPL-1.0-or-later   - GNU General Public License version 1, or any later version
+
+   * GPL-2.0-only       - GNU General Public License version 2
+
+   * GPL-2.0-or-later   - GNU General Public License version 2, or any later version
+
+   * GPL-3.0-or-later   - GNU General Public License version 3, or any later version
+
+   * LGPL-2.1-or-later  - GNU Lesser General Public License 2.1 or any later version
+
+   * MIT                - MIT License
+
+   * BSD-2-Clause       - Simplified BSD License
+
+   * BSD-3-Clause       - BSD 3-Clause "New" or "Revised" License
+
+   * BSD-4-Clause-UC    - BSD 4-Clause University of California-Specific
+
+   * EUPL-1.2           - European Union Public Licence version 1.2
+
+   * Public Domain
+
+Please, check the source code for more details. A license is usually at the start
+of each source file.
+
+The ./COPYING file (GPL-2.0-or-later) is the default license for code without
+an explicitly defined license.
+
+
+------------------------------------------------------------------------
+util-linux: BSD-2-Clause (the copyright lines are in the source file headers)
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+------------------------------------------------------------------------
+util-linux: BSD-3-Clause (the copyright lines are in the source file headers)
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+1. Redistributions of source code must retain the above copyright
+   notice, and the entire permission notice in its entirety,
+   including the disclaimer of warranties.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+3. The name of the author may not be used to endorse or promote
+   products derived from this software without specific prior
+   written permission.
+
+THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE, ALL OF
+WHICH ARE HEREBY DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+USE OF THIS SOFTWARE, EVEN IF NOT ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+------------------------------------------------------------------------
+util-linux: BSD-4-Clause-UC (the copyright lines are in the source file headers)
+
+/*
+ * Copyright (c) 1989 The Regents of the University of California.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *	This product includes software developed by the University of
+ *	California, Berkeley and its contributors.
+ * 4. Neither the name of the University nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+
+------------------------------------------------------------------------
+util-linux: ISC (the copyright lines are in the source file headers)
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+------------------------------------------------------------------------
+util-linux: MIT (the copyright lines are in the source file headers)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice (including the next
+paragraph) shall be included in all copies or substantial portions of the
+Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+------------------------------------------------------------------------
+xz: licensing summary
+
+
+XZ Utils Licensing
+==================
+
+    Different licenses apply to different files in this package. Here
+    is a summary of which licenses apply to which parts of this package:
+
+      - liblzma is under the BSD Zero Clause License (0BSD).
+
+      - The command line tools xz, xzdec, lzmadec, and lzmainfo are
+        under 0BSD except that, on systems that don't have a usable
+        getopt_long, GNU getopt_long is compiled and linked in from the
+        'lib' directory. The getopt_long code is under GNU LGPLv2.1+.
+
+      - The scripts to grep, diff, and view compressed files have been
+        adapted from GNU gzip. These scripts (xzgrep, xzdiff, xzless,
+        and xzmore) are under GNU GPLv2+. The man pages of the scripts
+        are under 0BSD; they aren't based on the man pages of GNU gzip.
+
+      - Most of the XZ Utils specific documentation that is in
+        plain text files (like README, INSTALL, PACKAGERS, NEWS,
+        and ChangeLog) are under 0BSD unless stated otherwise in
+        the file itself. The files xz-file-format.txt and
+        lzma-file-format.xt are in the public domain but may
+        be distributed under the terms of 0BSD too.
+
+      - Translated messages and man pages are under 0BSD except that
+        some old translations are in the public domain.
+
+      - Test files and test code in the 'tests' directory, and
+        debugging utilities in the 'debug' directory are under
+        the BSD Zero Clause License (0BSD).
+
+      - The GNU Autotools based build system contains files that are
+        under GNU GPLv2+, GNU GPLv3+, and a few permissive licenses.
+        These files don't affect the licensing of the binaries being
+        built.
+
+
+------------------------------------------------------------------------
+xz: liblzma and the xz tools (0BSD)
+
+Permission to use, copy, modify, and/or distribute this
+software for any purpose with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL
+THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR
+CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+------------------------------------------------------------------------
+vcgencmd: Raspberry Pi utils (BSD-3-Clause)
+
+Copyright (c) 2023, Raspberry Pi Ltd.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holder nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+

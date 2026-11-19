@@ -1,0 +1,414 @@
+#!/bin/sh
+#
+# Start the Orchestrator agent.
+#
+# The agent baked into this image is the ONLY agent that runs here. There used
+# to be a fetch_agent step that downloaded a newer one from the platform; it was
+# removed because it could never work against a cloud (https) install — busybox
+# here is built without TLS, so every attempt failed with "not an http or ftp
+# url" and fell back to the baked binary anyway — and making it work over plain
+# http would have meant an unauthenticated, unversioned binary fetch with no
+# anti-rollback, on the one path that runs before the agent exists. The platform
+# already ships agents to managed nodes via update_agent over real TLS. The cost
+# of this decision is that a new agent reaches recovery only by rebaking
+# boot.img; that is deliberate.
+#
+# Adoption config resolution order:
+#   1. /mnt/sdcard/node-adoption.txt from a mounted SD/USB boot partition
+#      (SD provisioning of a factory-clean device).
+#   2. The EEPROM UPTIME_TOKEN (per-device, baked by the per-serial
+#      provisioning package) — the HTTP-netboot case. Materialized into the
+#      same file so the rest of this script and the agent read one path.
+# No adoption default is baked into this image: the image is generic and
+# multi-install (on-prem and cloud serve the same bytes); the install a device
+# belongs to is decided per-device by its SD card or EEPROM.
+
+AGENT=/usr/bin/orchestrator-agent
+
+# The card's adoption file and the EEPROM's live at DIFFERENT paths, on purpose.
+# With one shared path nothing can tell which source a device used, and once
+# the EEPROM copy exists a check for "the file is there" sees the file this
+# script wrote itself, so the card is never looked at again.
+CARD_MNT=/mnt/sdcard
+CARD_ADOPTION=$CARD_MNT/node-adoption.txt
+EEPROM_ADOPTION=/run/orchestrator-adoption.txt
+# Per-device identity files, so a MASTER card stays a master card. See
+# per_device_adoption() for why this directory exists.
+CARD_NODES_DIR=$CARD_MNT/nodes
+# Resolved per iteration by resolve_adoption(); the agent is started against it.
+ADOPTION=""
+PIDFILE=/var/run/orchestrator-agent.pid
+SUPERVISOR_PIDFILE=/var/run/orchestrator-supervisor.pid
+
+# Every network call here is bounded. busybox wget's default timeout is 900
+# seconds, and this script runs from ::sysinit, which BusyBox init completes
+# BEFORE starting any getty — so an unbounded call to an unreachable host means
+# no login prompt on any console for a quarter of an hour, in exactly the situation
+# ("the agent can't reach the platform, let me plug in a keyboard") the local
+# console exists to serve.
+WGET_TIMEOUT=20
+
+# say prints to stdout AND to /dev/tty1.
+#
+# Not decoration: stdout here is /dev/console, which resolves to the LAST
+# console= in cmdline.txt — the UART. Kernel printk goes to every console, so an
+# operator on HDMI sees the boot messages and none of this script's, which made
+# a real debugging session read as "the device does nothing". tty1 may not exist
+# on a headless carrier, hence the redirect is best-effort.
+say() {
+  echo "$@"
+  # ...and to the HDMI console, unless stdout ALREADY lands there. On a board
+  # with no serial console /dev/console resolves to tty1, and echoing again
+  # would print every line twice.
+  if [ -w /dev/tty1 ] && [ "$(stat -c %t:%T /dev/console 2>/dev/null)" != "$(stat -c %t:%T /dev/tty1 2>/dev/null)" ]; then
+    echo "$@" > /dev/tty1 2>/dev/null
+  fi
+  return 0
+}
+
+# HTTP-netboot has no SD card, so no adoption file on disk. The per-device
+# adoption blob lives in the EEPROM as UPTIME_TOKEN (set by the per-serial
+# provisioning package). Materialize it at the standard path so the agent reads
+# it exactly like the SD case.
+materialize_eeprom_adoption() {
+  rm -f "$EEPROM_ADOPTION"
+  command -v vcgencmd >/dev/null 2>&1 || return 1
+  token=$(vcgencmd bootloader_config 2>/dev/null | sed -n 's/^UPTIME_TOKEN=//p' | tr -d '\r\n')
+  [ -n "$token" ] || return 1
+  mkdir -p "$(dirname "$EEPROM_ADOPTION")"
+  printf '%s\n' "$token" > "$EEPROM_ADOPTION"
+  return 0
+}
+
+# blob_host prints the platform host recorded in an adoption file, for logging.
+blob_host() {
+  base64 -d "$1" 2>/dev/null | grep -o '"platform_url":"[^"]*"' \
+    | sed 's/.*:"//; s/"$//; s|https\{0,1\}://||; s|/.*||'
+}
+
+# adoption_field extracts one quoted string field from the base64 adoption blob.
+# It depends on json.Marshal emitting no spaces, which is true of the platform's
+# encoder today — do not "prettify" that payload.
+adoption_field() {
+  [ -n "$ADOPTION" ] && [ -f "$ADOPTION" ] || return
+  base64 -d "$ADOPTION" 2>/dev/null \
+    | grep -o "\"$1\":\"[^\"]*\"" | sed 's/.*:"//; s/"$//'
+}
+
+# Set the clock. There is no RTC on these boards, so this is the difference
+# between a working TLS handshake and a device that looks dead on a healthy
+# network.
+#
+# There is deliberately NO "the clock already looks fine" early return, and that
+# is the whole lesson of this function. A plausibility guard ("the year is
+# recent") is satisfied by the wrong value: the clock does not start at 1970
+# but at the IMAGE BUILD DATE, which has the right year and the right month and
+# is weeks behind, so such a guard declares it sane, the sync never runs, and
+# every certificate issued after the build reads "not yet valid". No local test
+# can tell "clock equals build date" from "clock is correct" — the device has
+# no other source of truth — so the only sound rule is to always ask the
+# network and accept anything that moves the clock FORWARD.
+#
+# Forward-only is what makes asking every time safe: a stale answer, a replayed
+# one, or a card whose created_at is months old can never drag the clock
+# backwards past a certificate's validity window.
+set_clock_forward() {
+  candidate="$1"
+  source="$2"
+  case "$candidate" in
+    ''|*[!0-9]*) return 1 ;;
+  esac
+  # Floor: 2024-01-01. Anything below is not a plausible wall clock.
+  [ "$candidate" -gt 1704067200 ] || return 1
+  [ "$candidate" -gt "$(date +%s)" ] || return 1
+  date -s "@$candidate" >/dev/null 2>&1 || return 1
+  say "[S99agent] clock advanced from $source ($(date -u))"
+  return 0
+}
+
+sync_clock() {
+  # Source 1: the platform's plaintext time endpoint. The host comes from the
+  # adoption file (works for SD provisioning, where the EEPROM is still blank)
+  # and falls back to the EEPROM HTTP_HOST (the netboot case). busybox wget can
+  # neither do HTTPS nor follow the app host's :80->:443 redirect, which is why
+  # the platform exposes this over plain HTTP — and why the response is matched
+  # against a strict digit pattern rather than filtered: a routing mistake
+  # serves the SPA's index.html, and stripping that to digits yields a number
+  # that would sail past a naive range check.
+  host=$(adoption_field platform_url | sed 's|https\{0,1\}://||; s|/.*||; s|:.*||')
+  if [ -z "$host" ]; then
+    host=$(vcgencmd bootloader_config 2>/dev/null | sed -n 's/^HTTP_HOST=//p' | tr -d '\r' | head -1)
+  fi
+  if [ -n "$host" ]; then
+    ts=$(wget -T "$WGET_TIMEOUT" -qO- "http://$host/http-boot/time" 2>/dev/null | tr -d '\r\n')
+    case "$ts" in
+      [0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]|[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9])
+        set_clock_forward "$ts" "http://$host/http-boot/time" && return
+        ;;
+      *)
+        say "[S99agent] clock: no usable time from http://$host/http-boot/time"
+        ;;
+    esac
+  else
+    say "[S99agent] clock: no host to ask (no adoption file, no EEPROM HTTP_HOST)"
+  fi
+
+  # Source 2, offline floor: the adoption blob carries created_at, stamped when
+  # the operator downloaded the bundle. It is a LOWER BOUND, not the time, so it
+  # runs only after the network attempt and only ever moves the clock forward.
+  # Enough to validate certificates issued before the download, which is the
+  # common case for a card used soon after it was written. created_at is a JSON
+  # number, so the quoted-string extractor cannot read it.
+  created=$(base64 -d "$ADOPTION" 2>/dev/null | grep -o '"created_at":[0-9]*' | sed 's/.*://')
+  set_clock_forward "$created" "the bundle's created_at (network time unavailable)" || \
+    say "[S99agent] clock: left at $(date -u) — no network time, and the bundle's created_at is not ahead of it"
+}
+
+# board_serial prints this device's hardware serial, or nothing.
+#
+# /proc/cpuinfo's Serial line comes from OTP and is the same value the agent
+# reports as its hardware fingerprint (it harvests the same line, as 16
+# lowercase hex), so a per-device file named after it is named after the
+# identity the platform will bind — which is what lets an operator match a file
+# on the card to a node in the UI. Sanitised to lowercase hex because it becomes
+# a filename on a FAT partition.
+board_serial() {
+  sed -n 's/^Serial[[:space:]]*:[[:space:]]*//p' /proc/cpuinfo 2>/dev/null \
+    | tr -dc '0-9a-fA-F' | tr 'A-F' 'a-f' | tail -c 32
+}
+
+# is_master_blob reports whether an adoption file carries a MASTER token — the
+# shared enrolment credential written by the "SD provisioning" download — rather
+# than one node's own credential.
+# Reads via stdin rather than a filename argument: busybox base64 accepts a
+# positional file, but the host shells this logic gets tested in do not, and this
+# form works everywhere.
+is_master_blob() {
+  base64 -d < "$1" 2>/dev/null | grep -q '"master_token":"[^"]'
+}
+
+# per_device_adoption redirects a MASTER card's blob to a per-device copy, and
+# sets ADOPTION to the path the agent should be started with.
+#
+# It ASSIGNS rather than prints on purpose: it also warns via say(), and a
+# function that does both cannot be called in a command substitution — the
+# warning would be captured as part of the path.
+#
+# The problem it solves: after the master-token handshake the platform hands the
+# device its own identity, and the agent REWRITES the adoption file it was
+# started with. Pointed at the card, that turns a reusable master card into node
+# #1's card — and in the next device the platform finds node #1 with a
+# fingerprint that does not match, refuses the handshake and the board simply
+# never appears, retrying about once a second forever. The failure looks like
+# dead hardware and says nothing about the card.
+#
+# So the master blob is copied to nodes/<serial>.txt and the AGENT is pointed
+# there. node-adoption.txt is then never written by anything, and the card
+# provisions an unlimited number of devices; each device still gets a durable
+# credential of its own, which is the whole reason the rewrite exists.
+#
+# Two consequences worth stating rather than discovering:
+#   - The card accumulates one credential per device it has provisioned. That is
+#     no broader a capability than the master token it already carries (which
+#     can enrol any number of nodes), but unlike the master token these do not
+#     expire. Treat the card as a secret.
+#   - A stale entry is recoverable by deleting nodes/<serial>.txt: the device
+#     falls back to enrolling with the master token again. That is the fix if a
+#     node was deleted on the platform and its old board is being re-provisioned.
+#
+# Falls back to the master file itself (the agent then rewrites it, with the
+# consequence described above) if the
+# serial is unreadable or the card cannot be written to, because enrolling and
+# damaging the card beats not enrolling at all.
+per_device_adoption() {
+  master="$1"
+  ADOPTION="$master"
+  is_master_blob "$master" || return 0
+
+  serial=$(board_serial)
+  if [ -z "$serial" ]; then
+    say "[S99agent] WARNING: cannot read this board's serial; using the card's master blob directly."
+    say "[S99agent]          The card will be rewritten with this node's identity and stop being a master."
+    return 0
+  fi
+
+  if ! mkdir -p "$CARD_NODES_DIR" 2>/dev/null; then
+    say "[S99agent] WARNING: cannot create $CARD_NODES_DIR (read-only card?); using the master blob directly."
+    return 0
+  fi
+
+  per="$CARD_NODES_DIR/$serial.txt"
+  if [ ! -f "$per" ]; then
+    # Seed from the master blob. Once the platform answers, the agent replaces
+    # this copy with this node's own credential; the master stays untouched.
+    if ! cp "$master" "$per" 2>/dev/null; then
+      say "[S99agent] WARNING: cannot write $per; using the master blob directly."
+      return 0
+    fi
+  fi
+  ADOPTION="$per"
+}
+
+# resolve_adoption decides WHICH adoption blob this boot uses, and says so.
+#
+# The card always wins over the EEPROM. That is a product rule, not an
+# implementation detail: writing a provisioning card is an operator saying "this
+# device now belongs to THIS install", and a device that has been provisioned
+# before still carries the previous install's UPTIME_TOKEN in its EEPROM. With
+# the EEPROM first, such a device silently adopts against its previous install
+# while the freshly written card sits unread — a second-hand board does exactly
+# that — and nothing on screen explains it.
+#
+# It is re-run every supervisor iteration: a card that was not ready on the first
+# pass must still be able to win later; that is the other reason the EEPROM
+# blob is never written to the card's own path.
+#
+# The mount is READ-WRITE, and that is load-bearing. After a master-token
+# handshake the platform hands the agent this node's own identity and the agent
+# writes it back to node-adoption.txt on this partition. Read-only, that write
+# fails, the agent logs "this node still depends on the master token", and the
+# device re-adopts with the shared account-wide token on EVERY boot until that
+# token's TTL expires — after which it cannot come back at all.
+resolve_adoption() {
+  ADOPTION=""
+  mkdir -p "$CARD_MNT"
+  umount "$CARD_MNT" 2>/dev/null
+
+  card_dev=""
+  card_present=0
+  # Only the FIRST partition of each candidate is tried, which is why a card
+  # partitioned by macOS Disk Utility (GUID map: a 200 MiB EFI volume at p1 and
+  # the real FAT at p2) boots this image and then finds nothing.
+  for dev in /dev/mmcblk1p1 /dev/mmcblk0p1 /dev/sda1 /dev/mmcblk1 /dev/mmcblk0; do
+    [ -b "$dev" ] || continue
+    mount -t vfat -o rw,sync "$dev" "$CARD_MNT" 2>/dev/null || continue
+    card_present=1
+    if [ -f "$CARD_ADOPTION" ]; then
+      card_dev="$dev"
+      break
+    fi
+    umount "$CARD_MNT" 2>/dev/null
+  done
+
+  eeprom_ok=0
+  materialize_eeprom_adoption && eeprom_ok=1
+
+  if [ -n "$card_dev" ]; then
+    # Resolved BEFORE the log line, because which file the agent is given is
+    # exactly what an operator needs to see when a card stops working.
+    per_device_adoption "$CARD_ADOPTION"
+    if [ "$ADOPTION" != "$CARD_ADOPTION" ]; then
+      say "[S99agent] adoption source: SD card ($card_dev, master) -> $(blob_host "$ADOPTION")"
+      say "[S99agent]   this device uses nodes/$(basename "$ADOPTION"); the master blob is left untouched"
+    else
+      say "[S99agent] adoption source: SD card ($card_dev) -> $(blob_host "$ADOPTION")"
+    fi
+    if [ "$eeprom_ok" = 1 ]; then
+      eh=$(blob_host "$EEPROM_ADOPTION")
+      ch=$(blob_host "$ADOPTION")
+      # Worth stating rather than hiding: this device was provisioned before,
+      # against a different install, and the card is deliberately overriding it.
+      [ -n "$eh" ] && [ "$eh" != "$ch" ] && \
+        say "[S99agent] note: this device's EEPROM still points at $eh; the card wins"
+    fi
+    return 0
+  fi
+
+  if [ "$eeprom_ok" = 1 ]; then
+    ADOPTION="$EEPROM_ADOPTION"
+    say "[S99agent] adoption source: EEPROM UPTIME_TOKEN -> $(blob_host "$ADOPTION")"
+    if [ "$card_present" = 1 ]; then
+      # The case that cost an afternoon: a card IS in the slot, it just has no
+      # node-adoption.txt where the device looks. Name it instead of falling
+      # through quietly.
+      say "[S99agent] WARNING: a boot partition is present but has no node-adoption.txt in its ROOT."
+      say "[S99agent]          Unzip the provisioning bundle INTO THE ROOT of the card, not a subfolder."
+      say "[S99agent]          Using this device's PREVIOUS provisioning from EEPROM instead."
+    fi
+    return 0
+  fi
+
+  say "[S99agent] no adoption config: no node-adoption.txt on any boot partition and no EEPROM UPTIME_TOKEN"
+  return 1
+}
+
+wait_for_network() {
+  i=0
+  while [ $i -lt 30 ]; do
+    if ip route 2>/dev/null | grep -q "^default"; then
+      say "[S99agent] network up: $(ip -4 addr show eth0 2>/dev/null | grep -o 'inet [0-9.]*' | head -1)"
+      return 0
+    fi
+    i=$((i + 1))
+    sleep 1
+  done
+  say "[S99agent] no default route after 30s; continuing anyway"
+  return 1
+}
+
+# supervise runs the whole bring-up in a loop, not just the agent.
+#
+# The agent exits(1) when its FIRST connection attempt fails — its own
+# reconnection loop only starts after one success — and nothing here restarted
+# it, so a device whose DHCP lease landed a second too late stayed dead until
+# someone power-cycled it. Restarting only the binary would not have helped
+# either: the clock and the adoption file are set up before it starts, so a node
+# that came up without a network would loop forever on a 1970 clock and never
+# complete a TLS handshake. Hence the whole body repeats.
+supervise() {
+  attempt=0
+  while :; do
+    attempt=$((attempt + 1))
+    wait_for_network
+    resolve_adoption
+    sync_clock
+
+    if [ -z "$ADOPTION" ]; then
+      say "[S99agent] nothing to adopt with; retrying after backoff"
+    fi
+    say "[S99agent] starting $AGENT (attempt $attempt)"
+    # The agent's own log goes to the system log, NOT to /dev/console: it logs
+    # continuously, and the console is where the getty lives — a login prompt
+    # buried under a heartbeat every 30 seconds is not a usable console.
+    "$AGENT" ${ADOPTION:+-adoption-file "$ADOPTION"} 2>&1 | logger -t orchestrator-agent &
+    agent_pid=$!
+    echo $agent_pid > "$PIDFILE"
+    wait $agent_pid
+    say "[S99agent] agent exited (attempt $attempt); restarting after backoff"
+
+    # Backoff capped at a minute, with jitter: a fleet that netbooted together
+    # after a platform outage would otherwise come back as one synchronized
+    # retry storm. /dev/urandom rather than $RANDOM, which busybox ash lacks.
+    backoff=$((attempt * 5))
+    [ $backoff -gt 60 ] && backoff=60
+    jitter=$(od -An -N1 -tu1 /dev/urandom 2>/dev/null | tr -dc '0-9')
+    [ -n "$jitter" ] || jitter=0
+    sleep $((backoff + jitter % 10))
+  done
+}
+
+case "$1" in
+  start)
+    # Backgrounded on purpose. BusyBox init runs every ::sysinit entry to
+    # completion before starting a single getty, so any blocking work here
+    # delays the login prompt on every console — the one thing an operator
+    # needs when the platform is unreachable.
+    supervise &
+    echo $! > "$SUPERVISOR_PIDFILE"
+    ;;
+  stop)
+    # Stop the supervisor FIRST, or it restarts the agent we are about to kill.
+    [ -f "$SUPERVISOR_PIDFILE" ] && kill "$(cat "$SUPERVISOR_PIDFILE")" 2>/dev/null
+    [ -f "$PIDFILE" ] && kill "$(cat "$PIDFILE")" 2>/dev/null
+    rm -f "$SUPERVISOR_PIDFILE" "$PIDFILE"
+    ;;
+  restart)
+    "$0" stop; sleep 1; "$0" start
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart}"
+    exit 1
+    ;;
+esac
+
+exit 0

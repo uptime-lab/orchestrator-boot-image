@@ -1,0 +1,32 @@
+#!/bin/sh
+#
+# Add a getty on the serial console, but only if the device is really there.
+#
+# BusyBox init has no conditional inittab entries: a declared getty on a
+# missing tty respawns forever, and on a Pi 5 (no ttyAMA0 unless uart0 is
+# enabled for that board) it prints "can't open /dev/ttyAMA0" several times a
+# second and buries every other message. So the entry is appended here and init
+# is asked to re-read the file — /etc is a tmpfs, so this is per-boot state and
+# nothing persists.
+#
+# Runs as S00 so the console exists before anything else has something to say.
+
+INITTAB=/etc/inittab
+
+case "$1" in
+  start)
+    for tty in ttyAMA0 ttyS0; do
+      [ -c "/dev/$tty" ] || continue
+      grep -q "^$tty::" "$INITTAB" && continue
+      printf '%s::respawn:/sbin/getty -L %s 115200 vt100\n' "$tty" "$tty" >> "$INITTAB"
+      echo "[S00console] serial console on /dev/$tty"
+      # SIGHUP makes BusyBox init re-read inittab and start the new entry.
+      kill -HUP 1
+      break
+    done
+    ;;
+  stop|restart)
+    ;;
+esac
+
+exit 0

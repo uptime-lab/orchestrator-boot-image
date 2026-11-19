@@ -1,0 +1,142 @@
+# Orchestrator HTTP-boot bootstrap — one image for CM4, CM4S, CM5, CM5 Lite,
+# Raspberry Pi 4 B and Raspberry Pi 5.
+# The RPi firmware loads the kernel + matching DTB + the external initramfs
+# (rootfs.cpio.gz) into RAM. Rootfs lives entirely in RAM; cmdline.txt has no root=.
+#
+# The model filters below are the firmware's, and they are not what their names
+# suggest. From the official table:
+#   [pi4]  -> 4B, 400, Compute Module 4, Compute Module 4S   (all BCM2711)
+#   [pi5]  -> 5, 500, 500+, Compute Module 5                 (all BCM2712)
+#   [cm4]  -> CM4 only, and it ALSO sees [pi4] contents
+#   [cm4s] -> CM4S only, and it ALSO sees [pi4] contents
+#   [cm5]  -> CM5 only, and it ALSO sees [pi5] contents
+# There is no [cm5l]: a section of that name matches nothing. And a Pi 4 B is
+# not matched by [cm4], so the BCM2711 kernel override belongs under [pi4] —
+# under [cm4] a Pi 4 B takes the global BCM2712 kernel and hangs on the rainbow
+# screen.
+
+arm_64bit=1
+enable_uart=1
+# The initramfs is named explicitly below; the firmware must not pick one.
+auto_initramfs=0
+# Boot-critical settings are GLOBAL so they also apply to variants the model
+# filters do not match — notably CM5 Lite, which no documented filter selects.
+#   - os_check=0 : skip the firmware "does this OS support the board?" gate for
+#     our custom RAM bootstrap kernel (all SoCs).
+#   - initramfs  : same rootfs for every SoC.
+#   - kernel     : BCM2712 is the default (Pi 5, Pi 500, CM5, CM5 Lite);
+#     [pi4] overrides it for every BCM2711 board.
+os_check=0
+initramfs rootfs.cpio.gz followkernel
+kernel=kernel_2712.img
+# Force the CM5 device tree for ALL BCM2712 (CM5 AND CM5 Lite). The firmware
+# auto-selects bcm2712-rpi-cm5l-cm5io.dtb on a CM5L, which it fails to load
+# ("Device-tree file ... not found"); the CM5 dtb boots the Lite fine (see
+# raspberrypi/firmware#1977). A plain CM5 already used this dtb, so unchanged.
+#
+# KEEP THIS. It is crude — it is why a Pi 5 in recovery reports itself as a
+# Compute Module 5 — but removing it is not the fix, because the DTB the
+# firmware would then auto-select may not be in this image at all: a Pi 5 of D0
+# stepping asks for bcm2712d0-rpi-5-b.dtb, and a CM5/CM5L on a CM4IO-class
+# carrier asks for the -cm4io variants. Relax it only once the full DTB set is
+# shipped AND proven on hardware. The board-identity problem it caused is solved
+# instead by reporting the board revision code, which the firmware writes from
+# OTP and no device_tree= can rewrite.
+device_tree=bcm2712-rpi-cm5-cm5io.dtb
+[pi4]
+# Every BCM2711 board: 4B, 400, CM4, CM4S.
+#
+# The kernel is common to all of them. The device tree is NOT, so it is set per
+# board below — pointing a Pi 4 B at the CM4 device tree would probably boot and
+# then be subtly wrong about its peripherals, which is worse than not booting.
+#
+# disable-bt is common too, and belongs here rather than under [cm4]. On
+# BCM2711 the PL011 is wired to Bluetooth by default and GPIO14/15 get the
+# mini-UART (ttyS0); cmdline.txt asks for a console on ttyAMA0 and S00console
+# puts a getty there, so without this a Pi 4 B has no working serial console
+# at all.
+kernel=kernel8.img
+dtoverlay=disable-bt
+
+[cm4]
+# CM4 also sees [pi4], so only the CM4-specific parts belong here.
+device_tree=bcm2711-rpi-cm4.dtb
+# Put the USB2.0 OTG port into host mode so a keyboard works for local console
+# login in recovery — the offline-debug path when the agent cannot reach the
+# platform (a bad clock, no network). Pi 4 B USB is behind the VL805 XHCI and
+# Pi 5/CM5 USB comes from the RP1, so neither needs this and neither should get
+# it.
+dtoverlay=dwc2,dr_mode=host
+
+[cm4s]
+# CM4S is the CM3 form factor with BCM2711 silicon; same console arrangement as
+# a CM4. It also sees [pi4].
+device_tree=bcm2711-rpi-cm4s.dtb
+dtoverlay=dwc2,dr_mode=host
+
+[cm5]
+# UART0 on GPIO14/15 (pins 8/10). Under [cm5] — the ONLY placement this board
+# set is known to survive.
+#
+# Global scope panics a CM5 LITE at 0.27s, and so does [pi5], identically.
+# That says [pi5] ("5, 500, 500+, Compute Module 5") ALSO selects the Lite,
+# even though [cm5] demonstrably does not:
+#
+#   pc : bcm2712_pull_config_set / brcmuart_init / pinctrl_bind_pins
+#   Kernel panic - not syncing: Asynchronous SError Interrupt
+#
+# A Pi 5 therefore gets no serial console from this section. It gets one from
+# the exact [board-type=0x17] filter further down, which a CM5 Lite does not
+# match; never widen this section to a family filter on a guess about which
+# filter covers what.
+dtparam=uart0=on
+
+# PCIe Gen 3 on the CM5's x1 link. Without this line every install_os run from
+# recovery on a CM5 writes over a Gen 2 link.
+#
+# Scoped to [cm5] deliberately. A Pi 5 does NOT read [cm5] contents (though a
+# CM5 does read [pi5]'s), and Gen 3 is not certified there, so this is the one
+# filter that expresses "CM5 and nothing else". CM5 Lite is not matched by [cm5]
+# either and so does not get Gen 3; changing that is a hardware-validation
+# question, not a code one.
+dtparam=pciex1_gen=3
+
+# Pi 5 (0x17) and Pi 500 (0x19) get their OWN device trees.
+#
+# They are BCM2712 and so inherit the forced CM5 tree above, which describes a
+# Compute Module on a CM5IO carrier — wrong Ethernet, wrong pinmux. Observed on
+# a Pi 5: it boots, then udhcpc never gets a lease and the agent cannot reach
+# the platform, on a network where everything else works.
+[board-type=0x17]
+device_tree=bcm2712-rpi-5-b.dtb
+# UART0 on GPIO14/15. A Pi 5 is not matched by [cm5], so this is where it gets
+# a serial console — and without it /dev/ttyAMA0 never appears and the inittab
+# getty aimed at it respawns forever.
+dtparam=uart0=on
+
+[board-type=0x19]
+device_tree=bcm2712-rpi-500.dtb
+dtparam=uart0=on
+
+# CM5 Lite (revision-code type 0x1a) gets its OWN device tree.
+#
+# Everything else on BCM2712 keeps the forced CM5 tree above. A CM5 Lite 16GB
+# has been seen to panic in pinctrl during the UART probe on the CM5 tree; for
+# a newer SKU that tree may simply describe the wrong pins.
+#
+# If the bootloader does not honour [board-type=] this line is inert and the
+# board keeps the forced CM5 tree.
+[board-type=0x1a]
+device_tree=bcm2712-rpi-cm5l-cm5io.dtb
+
+# Board-type filters for the two BCM2711 boards that are not Compute Modules.
+# [pi4] would be the obvious home for these, but it is shared with CM4/CM4S and
+# each needs a different device tree, so they are addressed by revision-code
+# type instead: 0x11 is a Pi 4 B, 0x13 a Pi 400.
+[board-type=0x11]
+device_tree=bcm2711-rpi-4-b.dtb
+
+[board-type=0x13]
+device_tree=bcm2711-rpi-400.dtb
+
+[all]

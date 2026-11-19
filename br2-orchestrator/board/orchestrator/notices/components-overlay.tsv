@@ -1,0 +1,12 @@
+# Components of the image that Buildroot's legal-info does NOT list, because
+# they enter through the rootfs overlay or the FAT root rather than as
+# packages. Tab-separated: package, version, licence, origin. Hand-maintained;
+# a line starting with # is a comment. The version column may say "see image"
+# when the value is only knowable from the artifact (the baked agent). Every
+# file tracked under rootfs-overlay/ is named by its path in one origin column
+# (tests/notices.sh checks it); a prebuilt or third-party file also carries
+# its sha256 there.
+orchestrator-agent	see image	Apache-2.0	the Orchestrator agent release fetched by scripts/fetch-agent.sh, rootfs overlay usr/bin/orchestrator-agent; NOTICE-orchestrator-agent.txt
+vcgencmd	20250514-0ubuntu3	BSD-3-Clause	unmodified binary from Ubuntu's raspi-utils 20250514-0ubuntu3 arm64 package (source: github.com/raspberrypi/utils), rootfs overlay usr/bin/vcgencmd, sha256 8fdfc77195a25c9f9a98a62f4fe638e3c241e908f4edef2ed27e4e6c6d53133c
+ca-certificates	origin not recorded	MPL-2.0	PEM bundle of 121 public root CA certificates derived from Mozilla's CA store; the distribution and version it was taken from were not recorded; rootfs overlay etc/ssl/certs/ca-certificates.crt, sha256 42abac4a108699ceed5de68ec2d45928fec88de6108370c99d80f1184f7d9e79
+orchestrator-boot-image	see SOURCE-OFFER.txt	GPL-2.0-or-later	this tree's own files: rootfs overlay etc/init.d/S00console, etc/init.d/S99agent and etc/inittab, config.txt, cmdline.txt and the build scripts

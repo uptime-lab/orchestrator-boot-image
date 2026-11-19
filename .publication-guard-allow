@@ -1,0 +1,9 @@
+# Opt-outs for the publication guard's shape checker
+# (tools/publication-guard/check_public_shape.py --tree <this repository>), for
+# findings that have no line of their own to carry an inline marker. One
+# `<path> <rule>[,<rule>]  # reason` per line; the reason is required, every use
+# is listed as an opt-out in the checker's summary, and an entry that silences
+# nothing fails the run.
+
+br2-orchestrator/board/orchestrator/notices/LICENSES/THIRD-PARTY-NOTICES.txt email-domain  # upstream licence notices reproduced unaltered, as their licences require; the addresses are the upstream authors' own
+br2-orchestrator/board/orchestrator/rootfs-overlay/usr/bin/vcgencmd executable-magic  # the prebuilt Raspberry Pi vcgencmd shipped in the image (BSD-3-Clause, notice in notices/raspi-utils.LICENCE); a binary distribution of an upstream tool

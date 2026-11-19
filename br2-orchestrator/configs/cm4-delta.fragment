@@ -1,0 +1,56 @@
+# Orchestrator deltas appended to the stock raspberrypicm4io_64_defconfig.
+# (Stock config + these lines; later lines win.) See README.md.
+
+# RAM bootstrap: standalone gzip'd cpio rootfs, NOT embedded in the kernel.
+BR2_TARGET_ROOTFS_CPIO=y
+BR2_TARGET_ROOTFS_CPIO_GZIP=y
+# Drop the stock 120M ext4 rootfs (unused, wastes build time/space).
+# BR2_TARGET_ROOTFS_EXT2 is not set
+# Do NOT embed the initramfs into the kernel image.
+# BR2_TARGET_ROOTFS_INITRAMFS is not set
+
+# Our userspace: the agent + init script via overlay.
+BR2_ROOTFS_OVERLAY="$(BR2_EXTERNAL_ORCHESTRATOR_PATH)/board/orchestrator/rootfs-overlay"
+
+# Wired DHCP on eth0 (CM4 NIC = bcmgenet, built into the bcm2711 kernel).
+BR2_SYSTEM_DHCP="eth0"
+
+# Full util-linux "basic set" (includes lsblk; busybox lsblk lacks -J/JSON),
+# so the agent's DetectDevices() can enumerate NVMe/block devices for
+# install_os/erase_drive. "basic set" auto-selects the required libs.
+BR2_PACKAGE_UTIL_LINUX=y
+BR2_PACKAGE_UTIL_LINUX_BINARIES=y
+BR2_PACKAGE_UTIL_LINUX_WIPEFS=y
+
+# Tools the agent shells out to for install_os / erase_drive / partition expand.
+BR2_PACKAGE_PARTED=y
+BR2_PACKAGE_E2FSPROGS=y
+BR2_PACKAGE_E2FSPROGS_RESIZE2FS=y
+
+# Disable the stock RPi post-image script: it runs genimage to build an SD-card
+# image that needs rootfs.ext4 (which we don't produce). We assemble boot.img
+# ourselves from images/ via board/orchestrator/assemble-boot-img.sh.
+BR2_ROOTFS_POST_IMAGE_SCRIPT=""
+
+# Device trees for EVERY BCM2711 board this image supports, not just the CM4.
+#
+# The stock defconfig builds one DTB ("broadcom/bcm2711-rpi-cm4"), which is why
+# a Pi 4 B could not boot this image no matter what config.txt said: the file it
+# needed was never in the artifact. assemble-boot-img.sh only COPIES what the
+# build produced — it used to `|| true` past a missing file, so the gap was
+# invisible in the build log and only showed up as a rainbow screen on a device.
+#
+# Keep this list in step with the required-DTB list in assemble-boot-img.sh and
+# with the device_tree= values in board/orchestrator/config.txt: those are the
+# three places that must agree, and only the assemble script can check it.
+BR2_LINUX_KERNEL_INTREE_DTS_NAME="broadcom/bcm2711-rpi-cm4 broadcom/bcm2711-rpi-cm4s broadcom/bcm2711-rpi-4-b broadcom/bcm2711-rpi-400"
+
+# The 1899 kernel modules in the stock config are dead weight in a RAM rootfs:
+# there is no udev and no mdev.conf, /etc/modules-load.d does not exist so
+# S11modules exits immediately, and the agent never calls modprobe. Everything
+# the bootstrap actually uses — nvme, ext4, vfat, xhci, usbhid, evdev, fbcon —
+# is built in. They cost ~24 MB of a 94 MiB image, and the rootfs is taken from
+# the CM5 build anyway, so the CM4 kernel never had a matching tree to load
+# from. post-build.sh removes the module tree from the target; the kernel
+# configuration is the stock one, CONFIG_MODULES included.
+BR2_ROOTFS_POST_BUILD_SCRIPT="$(BR2_EXTERNAL_ORCHESTRATOR_PATH)/board/orchestrator/post-build.sh"

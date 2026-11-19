@@ -1,0 +1,15 @@
+# Buildroot packages of the base named in source-offer.env, as legal-info's
+# manifest.csv lists them: package, version, licence (tab-separated). The
+# FALLBACK for a notices run without a legal-info directory. Refresh it per
+# clean rebuild with:
+#   notices/make-notices.sh --dump-components <out-dir>/legal-info
+# A line starting with # is a comment.
+toolchain-external-arm-aarch64	14.2.rel1	unknown
+busybox	1.37.0	GPL-2.0, bzip2-1.0.4
+e2fsprogs	1.47.3	GPL-2.0, MIT-like with advertising clause (libss and libet)
+util-linux	2.41.4	GPL-2.0+, BSD-4-Clause, LGPL-2.1+ (libblkid, libfdisk, libmount), BSD-3-Clause (libuuid), BSD-2-Clause (xxhash), ISC (rfkill), MIT (hardlink, flock)
+kmod	33	LGPL-2.1+ (library), GPL-2.0+ (tools)
+xz	5.8.3	Public Domain, BSD-0-Clause, GPL-2.0+, GPL-3.0+, LGPL-2.1+
+parted	3.6	GPL-3.0+
+rpi-firmware	063bcab6c8a90efb0d19f69d88cbbc7ec79cab68	BSD-3-Clause
+linux	custom	GPL-2.0
