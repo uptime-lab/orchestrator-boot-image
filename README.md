@@ -178,8 +178,3 @@ has changed since `S` except those three records: any other change there
 means HEAD is no longer what was built. (The check reads that directory,
 which holds everything the image consumes; the bundle archives the whole
 repository at `S`.)
-
-The base this repository first recorded predates the rule: its base id and
-its `board_commit` name two different commits, and its bundle archives
-`br2-orchestrator/` alone. It still verifies; a base built with the recipe
-above follows the rule.
